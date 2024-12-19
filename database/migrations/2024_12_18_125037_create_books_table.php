@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,6 +14,14 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Category::class)->nullable()->constrained()->nullOnDelete();
+            $table->string('title');
+            $table->string('author');
+            $table->string('editor');
+            $table->date('edition_date');
+            $table->integer('stock');
+            $table->string('cover_image');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

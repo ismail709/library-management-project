@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('collections', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->text('description');
+            $table->string('cover_image');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
