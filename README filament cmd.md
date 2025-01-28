@@ -4,7 +4,7 @@ php artisan make:filament-resource resource-name
 
 php artisan make:filament-resource resource-name --soft-deletes
 
-php artisan make:filament-resource resource-name --soft-deletes --view
+php artisan make:filament-resource resource-name --soft-deletes --view --generate
 
 2. create form for create and edit inside Resource class
 

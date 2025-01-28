@@ -12,4 +12,8 @@ class Category extends Model
     use HasFactory,SoftDeletes;
 
     protected $guarded = [];
+
+    public function books(){
+        return $this->hasMany(Book::class);
+    }
 }

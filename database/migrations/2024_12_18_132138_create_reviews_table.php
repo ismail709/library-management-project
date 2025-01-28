@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Book::class)->constrained()->cascadeOnDelete();
             $table->integer('rating');
-            $table->string('comment');
+            $table->string('comment')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

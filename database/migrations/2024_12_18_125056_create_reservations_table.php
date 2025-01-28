@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Book;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,11 +16,12 @@ return new class extends Migration
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Book::class)->constrained()->cascadeOnDelete();
             $table->date('rental_date');
             $table->time('rental_time');
-            $table->time('due_date');
-            $table->time('return_date');
-            $table->enum('status', ['pending','rented','returned','late'])->default('');
+            $table->date('due_date');
+            $table->date('return_date')->nullable();
+            $table->enum('status', ['pending','rented','returned','late'])->default('pending');
             $table->softDeletes();
             $table->timestamps();
         });

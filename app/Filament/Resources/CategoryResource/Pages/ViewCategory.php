@@ -22,14 +22,4 @@ class ViewCategory extends ViewRecord
             Actions\RestoreAction::make(),
         ];
     }
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Grid::make(1)->schema([
-                        TextEntry::make('name')->color('gray'),
-                        TextEntry::make('description')->color('gray'),
-                    ])
-            ]);
-    }
 }
