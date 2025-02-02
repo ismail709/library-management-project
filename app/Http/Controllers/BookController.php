@@ -60,6 +60,11 @@ class BookController extends Controller
         return response()->json($books);
     }
     public function find(Request $request,Book $book){
+        $isViewed = $request->query('view',false);
+        $isViewed = filter_var($isViewed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if($isViewed){
+            $book->increment('views');
+        }
         return response()->json($book);
     }
 }
