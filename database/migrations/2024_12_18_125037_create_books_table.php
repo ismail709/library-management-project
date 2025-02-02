@@ -16,10 +16,12 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Category::class)->nullable()->constrained()->nullOnDelete();
             $table->string('title');
+            $table->string('slug');
             $table->string('author');
             $table->string('editor');
             $table->date('edition_date');
             $table->integer('stock');
+            $table->integer('views')->default(0);
             $table->string('cover_image');
             $table->softDeletes();
             $table->timestamps();

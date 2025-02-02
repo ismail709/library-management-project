@@ -26,12 +26,14 @@ class ReservationResource extends Resource
                     ->relationship('user',"name")
                     ->label('User')
                     ->required()
-                    ->preload(),
+                    ->preload()
+                    ->searchable(),
                 Forms\Components\Select::make('book_id')
                     ->relationship('book',"title")
                     ->label('Book')
                     ->required()
-                    ->preload(),
+                    ->preload()
+                    ->searchable(),
                 Forms\Components\DatePicker::make('rental_date')
                     ->required(),
                 Forms\Components\TimePicker::make('rental_time')
@@ -111,7 +113,7 @@ class ReservationResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('return')
-                    ->label('Mark as Returned') // Optional: Set a custom label
+                    ->label('Mark as Returned')
                     ->action(function ($record) {
                         if ($record->return_date === null) {
                             $returnDate = now();
@@ -122,7 +124,16 @@ class ReservationResource extends Resource
                                 'status' => $status,
                             ]);
                         }
-                    }),
+                    })
+                    ->visible(fn ($record) => $record->status === 'rented'),
+                Tables\Actions\Action::make('rent')
+                    ->label('Mark as Rented')
+                    ->action(function ($record) {
+                            $record->update([
+                                'status' => "rented",
+                            ]);
+                    })
+                    ->visible(fn ($record) => $record->status === 'pending'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

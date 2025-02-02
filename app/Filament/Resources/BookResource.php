@@ -31,6 +31,8 @@ class BookResource extends Resource
                 Forms\Components\TextInput::make('title')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('slug')
+                    ->readOnly(),
                 Forms\Components\TextInput::make('author')
                     ->required()
                     ->maxLength(255),
@@ -67,6 +69,9 @@ class BookResource extends Resource
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stock')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('views')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('cover_image')->square(),

@@ -3,9 +3,11 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Tables;
 use App\Models\Category;
 use Filament\Forms\Form;
+use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Grid;
@@ -30,7 +32,8 @@ class CategoryResource extends Resource
                 Grid::make(1)
                     ->schema([
                         TextInput::make('name')->autofocus()->required(),
-                        Textarea::make('description')->autosize()->required()
+                        Textarea::make('description')->autosize()->required(),
+                        Checkbox::make('featured')
                     ])
             ]);
     }
@@ -43,10 +46,10 @@ class CategoryResource extends Resource
                 ->label('Name')
                 ->sortable() // Allows sorting by this column
                 ->searchable(), // Allows searching by this column
-
-            TextColumn::make('description')
+                TextColumn::make('description')
                 ->label('Description')
                 ->limit(50), // Limits the displayed text to 50 characters
+                CheckboxColumn::make('featured')
             ])
             ->filters([
                 //
