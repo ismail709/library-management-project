@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schedule;
     this command delete users' reservations who didn't pickup
     their book on time and send them email notification.
 */
-Schedule::command(SendDeletedReservationsReminderEmail::class)->daily();
+Schedule::command(SendDeletedReservationsReminderEmail::class)->everyMinute();
 /*  
     this command sends email notifications to the users whose
     due date is the following day.

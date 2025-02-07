@@ -42,11 +42,11 @@ class ReviewResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('user.name')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('book_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('book.title')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('rating')
                     ->numeric()

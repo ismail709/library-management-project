@@ -25,6 +25,10 @@ class Book extends Model
         return $this->belongsToMany(Collection::class,'book_collection');
     }
 
+    public function reviews(){
+        return $this->hasMany(Review::class);
+    }
+
     protected static function booted(){
         static::creating(function (Book $book) {
             $baseSlug = Str::slug($book->title); // Generate base slug

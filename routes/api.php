@@ -4,6 +4,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,7 @@ Route::prefix("/books")->group(function () {
     Route::get("/popular",[BookController::class,"popular"]);
     Route::get("/mostrented",[BookController::class,"mostRented"]);
     Route::get("/recent",[BookController::class,"recent"]);
+    Route::get("/recommended/{book:slug}",[BookController::class,"recommended"]);
     Route::get("/{book:slug}",[BookController::class,"find"]);
     Route::get("/c/{category}",[BookController::class,"byCategory"]);
     Route::get("/cl/{collection}",[BookController::class,"byCollection"]);
@@ -48,4 +50,9 @@ Route::prefix("/reservations")->group(function () {
 Route::prefix("/favorites")->group(function () {
     Route::get("/check/{book}",[FavoriteController::class,"isFavorite"])->middleware("auth:sanctum");
     Route::get("/{book}",[FavoriteController::class,"toggleFavorite"])->middleware("auth:sanctum");
+});
+
+Route::prefix("/reviews")->group(function () {
+    Route::post("/store/{book:slug}",[ReviewController::class,"store"])->middleware('auth:sanctum');
+    Route::get("/{book:slug}",[ReviewController::class,"index"]);
 });
