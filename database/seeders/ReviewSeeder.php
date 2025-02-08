@@ -25,7 +25,6 @@ class ReviewSeeder extends Seeder
             // loop over them and create reviews for each book
             foreach ($randomBooks as $book) {
                 if(!Review::where("book_id", $book->id)->where("user_id", $user->id)->exists()) {
-                    Log::info("test".$book->title);
                     $book->reviews()->create(Review::factory()->make(["user_id"=> $user->id])->toArray());
                 }
             }

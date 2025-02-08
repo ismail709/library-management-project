@@ -26,18 +26,18 @@ class BookController extends Controller
         $limit = filter_var($limit, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
         if ($limit) {
-            $books = Cache::remember('searchbar_'.$query, now()->addMinutes(5), function () use($query) {
+            $books = Cache::remember('searchbar_' . $query, now()->addMinutes(5), function () use ($query) {
                 return Book::where('title', 'like', "%{$query}%")
-                ->orWhere('author', 'like', "%{$query}%")
-                ->limit(10)
-                ->get();
+                    ->orWhere('author', 'like', "%{$query}%")
+                    ->limit(10)
+                    ->get();
             });
             return response()->json($books);
         } else {
-            $books = Cache::remember('searchpage_'.$query."_page_".$page,now()->addMinutes(5),function () use($query){
+            $books = Cache::remember('searchpage_' . $query . "_page_" . $page, now()->addMinutes(5), function () use ($query) {
                 return Book::where('title', 'like', "%{$query}%")
-                ->orWhere('author', 'like', "%{$query}%")
-                ->paginate(10);
+                    ->orWhere('author', 'like', "%{$query}%")
+                    ->paginate(10);
             });
             return response()->json($books);
         }
@@ -49,28 +49,34 @@ class BookController extends Controller
     }
     public function mostRented(Request $request)
     {
-        $books = Book::withCount('reservations')  // Count reservations related to each book
-            ->having('reservations_count', '>=', 10)
-            ->orderBy('reservations_count', 'desc')  // Order by the reservation count
-            ->paginate(10);  // Paginate the results
+        $books = Book::withCount('reservations')
+            ->orderBy('reservations_count', 'desc')
+            ->paginate(10);
 
         return response()->json($books);
     }
     public function recent(Request $request)
     {
-        $books = Book::latest()->paginate(10); // Orders by created_at column in descending order
+        $page = $request->query('page', 1);
+        $books = Cache::remember("recent_books_" . $page, now()->addMinutes(60), function () {
+            return Book::latest()->paginate(10);
+        });
         return response()->json($books);
     }
     public function byCategory(Request $request, Category $category)
     {
-        // Assuming a book belongs to a category
-        $books = $category->books()->paginate(10);
+        $page = $request->query('page', 1);
+        $books = Cache::remember("recent_books_" . $page, now()->addMinutes(60), function () use ($category) {
+            return $category->books()->paginate(10);
+        });
         return response()->json($books);
     }
     public function byCollection(Request $request, Collection $collection)
     {
-        // Assuming a book belongs to a collection
-        $books = $collection->books()->paginate(10);
+        $page = $request->query('page', 1);
+        $books = Cache::remember("recent_books_" . $page, now()->addMinutes(60), function () use ($collection) {
+            return $collection->books()->paginate(10);
+        });
         return response()->json($books);
     }
     public function find(Request $request, Book $book)
@@ -95,7 +101,7 @@ class BookController extends Controller
     {
         $sameBookRenters = Reservation::where('book_id', $book->id)
             ->when(auth('sanctum')->check(), function ($query) {
-                $query->where('user_id',"!=", auth('sanctum')->user()->id);
+                $query->where('user_id', "!=", auth('sanctum')->user()->id);
             })
             ->pluck('user_id');
 
@@ -103,12 +109,15 @@ class BookController extends Controller
             return response()->json([]);
         }
 
-        $books = Book::whereHas('reservations', function ($query) use ($sameBookRenters, $book) {
-            $query->whereIn('user_id', $sameBookRenters)
-                  ->where('book_id', '!=', $book->id);
-        })
-        ->distinct()
-        ->paginate(10);
+        $page = $request->query('page', 1);
+        $books = Cache::remember("recommended_books_" . $page, now()->addMinutes(60), function () use ($book,$sameBookRenters) {
+            return Book::whereHas('reservations', function ($query) use ($sameBookRenters, $book) {
+                $query->whereIn('user_id', $sameBookRenters)
+                    ->where('book_id', '!=', $book->id);
+            })
+                ->distinct()
+                ->paginate(10);
+        });
 
         return response()->json($books);
 
