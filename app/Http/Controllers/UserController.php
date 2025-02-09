@@ -4,23 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function store(Request $request){
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
+        $validated['password'] = Hash::make($validated['password']);
     
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = User::create($validated);
     
         return response()->json([
             'message' => 'User created successfully!',
@@ -29,26 +28,23 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
-        // Validate the request
+        
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'password' => 'required|string|min:8',
         ]);
 
-        // Find user by email
         $user = User::where('email', $request->email)->first();
 
-        // Check if user exists and password is correct
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'These credentials do not match our records.',
                 'errors' => [
                     'email' => ['These credentials do not match our records.']
                 ]
-            ], 422); // 422 Unprocessable Entity
+            ], 422);
         }
 
-        // Generate a token (for API authentication)
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -59,7 +55,7 @@ class UserController extends Controller
     }
 
     public function logout(Request $request){
-        // Revoke the current user's token
+
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
@@ -69,28 +65,38 @@ class UserController extends Controller
     }
 
     public function reservations(Request $request){
-        $reservations = $request->user()->reservations()->with("book")->paginate(10); // This retrieves the reservations the user has made
+        $page = $request->query('page',1);
+        
+        $reservations = Cache::remember('reservations_for_user_'.$request->user()->id.'_page_'.$page, now()->addMinutes(60), function () use ($request) {
+            return $request->user()->reservations()->with("book")->paginate(10);
+        });
+
         return response()->json($reservations);
     }
     public function favorites(Request $request){
-        $favoriteBooks = $request->user()->favorites()->paginate(10); 
+        $page = $request->query('page',1);
+        
+        $favoriteBooks = Cache::remember('favorites_for_user_'.$request->user()->id.'_page_'.$page, now()->addMinutes(60), function () use ($request) {
+            return $request->user()->favorites()->paginate(10); 
+        });
+
         return response()->json($favoriteBooks);
     }
 
     public function update(Request $request,User $user){
-        // Validate request data
+        
         $validatedData = $request->validate([
             'name' => 'nullable|string|max:255',
             'email' => ['nullable','email',Rule::unique('users')->ignore($user)],
-            'password' => 'nullable|min:8|confirmed', // Only update if provided
+            'password' => 'nullable|min:8|confirmed',
         ]);
 
-        // Update user fields
+        
         if (!empty($validatedData['name'])) $user->name = $validatedData['name'];
         if (!empty($validatedData['email'])) $user->email = $validatedData['email'];
         if (!empty($validatedData['password'])) $user->password = bcrypt($validatedData['password']);
 
-        $user->save(); // Save changes to the database
+        $user->save();
 
         return response()->json([
             'message' => 'Profile updated successfully!',
